@@ -5,4 +5,5 @@ set(CMAKE_CXX_FLAGS "-std=c++11")
 add_executable(
 	main
 	Main/src/main.cpp
+	Main/src/Headers/Vector.h
 )
