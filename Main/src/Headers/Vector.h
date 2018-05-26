@@ -28,10 +28,11 @@ class Vector {
   explicit Vector(const Allocator& alloc) noexcept;
   Vector(std::size_t size, const T& value, Allocator alloc = Allocator());
   explicit Vector(std::size_t size, Allocator alloc = Allocator());
-  //template<class InputIt> Vector(InputIt first, InputIt last, Allocator alloc = Allocator()); (???)
+  template<typename InputIt, typename = std::_RequireInputIter<InputIt>>
+  Vector(InputIt first, InputIt last, Allocator alloc = Allocator()); //works, needs finish
   Vector(const Vector& other, Allocator alloc);
   Vector(Vector&& other) noexcept;
-  //Vector(Vector&& other, const Allocator& alloc); (??)
+  //Vector(Vector&& other, const Allocator& alloc);
   Vector(std::initializer_list<T>);
 
 
@@ -78,20 +79,27 @@ Vector<T, Allocator>::Vector(std::size_t size, Allocator alloc)
   std::fill_n(element_, size, T());
 }
 
-// template<class T, class Allocator>
-// template<class InputIt>
-// Vector<T, Allocator>::Vector(InputIt first, InputIt last, Allocator alloc) {
-//   int count = 0;
-//   InputIt tempFirst = first;
-//   while (tempFirst != last) {
-//     tempFirst++;
-//     count++;
-//     std::cout<< "boops!";
-//   }
-//   element_ = alloc.allocate(count);
-//   //std::move(first, last, element_);
-//   //std::copy(first, last, element_);
-// }
+template<class T, class Allocator>
+template<typename InputIt, typename>
+Vector<T, Allocator>::Vector(InputIt first, InputIt last, Allocator alloc)
+: size_{0} {
+  int count = 0;
+  InputIt tempFirst = first;
+  while (tempFirst != last) {
+    tempFirst++;
+    count++;
+    std::cout<< "boops!";
+  }
+  capacity_ = count;
+  element_ = alloc.allocate(count);
+  for(auto i=first; first!=last; ++i){
+    element_[size_] = *i;
+    size_++;
+  }
+  size_++;
+  //std::move(first, last, element_);
+  //std::copy(first, last, element_);
+}
 
 template<class T, class Allocator>
 Vector<T, Allocator>::Vector(const Vector& other, Allocator alloc)
