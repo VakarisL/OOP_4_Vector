@@ -48,7 +48,7 @@ int main() {
 
 	// Vector<std::string> godpls{"potato", "potato2"};
 	// std::cout <<godpls[0];
-	// // Vector<std::vector<int>> Ve{{1,2},{3,4}};
+	// Vector<Vector<int>> Ve{{1,2},{3,4}};
 	// std::cout << Ve[0][1] << " " << Ve[1][0] << std::endl;
 
 
@@ -74,5 +74,18 @@ int main() {
     std::cout << "After move assigment:\n"; 
     display_sizes(nums1, nums2, nums3);
 
+    nums2.clear();
+
+    std::cout << "After clear():\n"; 
+    display_sizes(nums1, nums2, nums3);
+
+    nums2.assign({8, 6, 8, 9, 5, 3, 1});
+
+    std::cout << "After assign():\n"; 
+    display_sizes(nums1, nums2, nums3);
+
+    std::cout << "at: " << nums2.at(4) <<std::endl;
+    std::cout << "Front: " << nums2.front() <<std::endl;
+    std::cout << "Back: " << nums2.back() <<std::endl;
 	return 0;
 }
