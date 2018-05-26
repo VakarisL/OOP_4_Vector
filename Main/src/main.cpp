@@ -87,5 +87,14 @@ int main() {
     std::cout << "at: " << nums2.at(4) <<std::endl;
     std::cout << "Front: " << nums2.front() <<std::endl;
     std::cout << "Back: " << nums2.back() <<std::endl;
+    std::cout << "begin: " << nums2.begin() << " value: " << *nums2.begin() <<  std::endl;
+    std::cout << "end: " << nums2.end() << " value: " << *nums2.end() << std::endl;
+    std::cout << "Reverse begin/end: "
+    for(auto i=nums2.rbegin(); i!=nums2.rend(); ++i){
+    	std::cout << *i << " ";
+    }
+    std::cout << std::endl;
+    
+
 	return 0;
 }

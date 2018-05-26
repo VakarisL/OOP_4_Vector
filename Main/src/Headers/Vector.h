@@ -5,15 +5,15 @@
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
+#include <iterator>
 
 template<class T, class Allocator = std::allocator<T>>
 class Vector {
  public:
-  //typedef T value_type;
-  //typedef Allocator allocator_type;
-  //typedef typename allocator_traits<Allocator>::pointer pointer;
-  // typedef T& reference;
-  // typedef const T& const_reference;
+  typedef T* iterator;
+  typedef const T* const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
  private:
   Allocator allocator_;
@@ -76,7 +76,25 @@ class Vector {
 
   //######### Iterators #########
   // begin/cbegin
+  iterator begin() noexcept {return element_;}
+  const_iterator begin() const noexcept {return element_;}
+  const_iterator cbegin() const noexcept {return element_;} //should it be different from 'const_iterator begin() const noexcept'?
+                                                            //both are the same in STL vector
 
+  // end/cend
+  iterator end() noexcept {return &element_[size_];}
+  const_iterator end() const noexcept {return &element_[size_];}
+  const_iterator cend() const noexcept {return &element_[size_];} //same as cbegin(), should it be different from const_iterator end()?
+
+  // rbegin/crbegin
+  reverse_iterator rbegin() noexcept {return reverse_iterator(end());}
+  const_reverse_iterator rbegin() const noexcept {return reverse_iterator(end());}
+  const_reverse_iterator crbegin() const noexcept {return reverse_iterator(cend());} //once again cbegin() == begin()??
+
+  // rend/crend
+  reverse_iterator rend() noexcept {return reverse_iterator(begin());}
+  const_reverse_iterator rend() const noexcept {return reverse_iterator(begin());}
+  const_reverse_iterator crend() const noexcept {return reverse_iterator(cbegin());}
 
   //######### Capacity #########
   int size() const {return size_;}
@@ -270,6 +288,8 @@ const T& Vector<T, Allocator>::at(std::size_t pos) const{
   }
   return element_[pos];
 }
+
+
 
 
 
