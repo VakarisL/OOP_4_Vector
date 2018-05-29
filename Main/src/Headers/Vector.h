@@ -17,6 +17,7 @@ class Vector {
 
  private:
   Allocator allocator_;
+  std::allocator<T> all;
   std::size_t capacity_;
   std::size_t size_;
   T* element_;
@@ -27,13 +28,13 @@ class Vector {
   //constructors
   Vector() noexcept(noexcept(Allocator()));
   explicit Vector(const Allocator& alloc) noexcept;
-  Vector(std::size_t size, const T& value, Allocator alloc = Allocator());
+  Vector(std::size_t size, const T& value/*, Allocator alloc = Allocator()*/);
   explicit Vector(std::size_t size, Allocator alloc = Allocator());
   template<typename InputIt, typename = std::_RequireInputIter<InputIt>>
   Vector(InputIt first, InputIt last, Allocator alloc = Allocator()); //works, needs finish TODO
   Vector(const Vector& other, Allocator alloc);
   Vector(Vector&& other) noexcept;
-  //Vector(Vector&& other, const Allocator& alloc); (??)
+  //Vector(Vector&& other, const Allocator& alloc); (??) would need special case handling(?) when alloc=/=allocator_
   Vector(std::initializer_list<T>);
 
   // destructors
@@ -67,8 +68,8 @@ class Vector {
   const T& front() const {return element_[0];}
 
   // back
-  T& back() {return element_[size_-1];}
-  const T& back() const {return element_[size_-1];}
+  T& back() {return element_[size_ - 1];}
+  const T& back() const {return element_[size_ - 1];}
 
   // data
   T& data() noexcept {return element_;}
@@ -79,7 +80,7 @@ class Vector {
   iterator begin() noexcept {return element_;}
   const_iterator begin() const noexcept {return element_;}
   const_iterator cbegin() const noexcept {return element_;} //should it be different from 'const_iterator begin() const noexcept'?
-                                                            //both are the same in STL vector
+  //both are the same in STL vector
 
   // end/cend
   iterator end() noexcept {return &element_[size_];}
@@ -96,13 +97,54 @@ class Vector {
   const_reverse_iterator rend() const noexcept {return reverse_iterator(begin());}
   const_reverse_iterator crend() const noexcept {return reverse_iterator(cbegin());}
 
+
+
   //######### Capacity #########
-  int size() const {return size_;}
+  // empty
+  bool empty() const noexcept {return (size_ == 0 ? true : false);}
+
+  // size
+  int size() const noexcept {return size_;}
+
+  // max_size
+  std::size_t max_size() const noexcept {return allocator_.max_size();}
+
+  // reserve
+  void reserve(std::size_t new_cap);
+
+  // capacity
+  std::size_t capacity() const noexcept {return capacity_;}
+
+  // shrink_to_fit
+  void shrink_to_fit();
+
+
 
   //######### Modifiers #########
   // clear
   void clear();
 
+  // insert
+  iterator insert(const_iterator pos, const T& value);
+  iterator insert(const_iterator pos, T&& value);
+  iterator insert(const_iterator pos, std::size_t count, const T& value);
+  template<typename InputIt, typename = std::_RequireInputIter<InputIt>>
+  iterator insert(const_iterator pos, InputIt first, InputIt last);
+  iterator insert(const_iterator pos, std::initializer_list<T> ilist);
+
+  // emplace
+
+  // erase
+
+  // push_back
+
+  // emplace_back
+
+  // pop_back
+
+  // resize
+
+  // swap
 
   //######### Non-member Functions #########
 
@@ -122,8 +164,8 @@ Vector<T, Allocator>::Vector(const Allocator& alloc) noexcept
 }
 
 template<class T, class Allocator>
-Vector<T, Allocator>::Vector(std::size_t size, const T& value, Allocator alloc)
-  : capacity_(size), size_(size), element_{alloc.allocate(capacity_)} {
+Vector<T, Allocator>::Vector(std::size_t size, const T& value /*, Allocator alloc*/)
+  : capacity_(size), size_(size), element_{all.allocate(capacity_)} {
   std::fill_n(element_, size, value);
 }
 
@@ -150,8 +192,6 @@ Vector<T, Allocator>::Vector(InputIt first, InputIt last, Allocator alloc)
     size_++;
   }
   size_++;
-  //std::move(first, last, element_);
-  //std::copy(first, last, element_);
 }
 
 template<class T, class Allocator>
@@ -274,25 +314,49 @@ void Vector<T, Allocator>::assign(std::initializer_list<T> input) {
 }
 
 template<class T, class Allocator>
-T& Vector<T, Allocator>::at(std::size_t pos){
-  if(pos>size_) {
+T& Vector<T, Allocator>::at(std::size_t pos) {
+  if (pos > size_) {
     throw std::out_of_range{"Vector position out of range"};
   }
   return element_[pos];
 }
 
 template<class T, class Allocator>
-const T& Vector<T, Allocator>::at(std::size_t pos) const{
-  if(pos>size_) {
+const T& Vector<T, Allocator>::at(std::size_t pos) const {
+  if (pos > size_) {
     throw std::out_of_range{"Vector position out of range"};
   }
   return element_[pos];
 }
 
+template<class T, class Allocator>
+void Vector<T, Allocator>::reserve(std::size_t new_cap) {
+  if (new_cap > max_size()) {
+    throw std::length_error{"Vector reserve capacity"};
+  }
+  if (new_cap > capacity_) {
+    T* elementTemp = allocator_.allocate(new_cap);
+    for (std::size_t i = 0; i < size_; ++i) {
+      elementTemp[i] = element_[i];
+    }
+    allocator_.deallocate(element_, capacity_);
+    capacity_ = new_cap;
+    element_ = elementTemp;
+    elementTemp = nullptr;
+  }
+}
 
-
-
-
+template<class T, class Allocator>
+void Vector<T, Allocator>::shrink_to_fit() {
+  T* elementTemp = allocator_.allocate(size_);
+  for (std::size_t i = 0; i < size_; ++i) {
+    elementTemp[i] = element_[i];
+  }
+  allocator_.deallocate(element_, capacity_);
+  capacity_ = size_;
+  element_ = elementTemp;
+  elementTemp = nullptr;
+}
 
 template<class T, class Allocator>
 void Vector<T, Allocator>::clear() {
@@ -301,5 +365,139 @@ void Vector<T, Allocator>::clear() {
   }
   size_ = 0;
 }
+
+template<class T, class Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, const T& value) {
+  int counter = 0;
+  bool contains = false;
+  for (const_iterator i = begin(); i != end(); ++i) {
+    if (i == pos) {
+      contains = true;
+      break;
+    }
+    counter++;
+  }
+  if (size_ == capacity_) reserve(capacity_ * 2);
+  iterator tempPos = &element_[counter];
+  if (contains) {
+    std::copy(tempPos, end(), tempPos + 1);
+    *tempPos = value;
+    size_++;
+  } else {
+    throw std::out_of_range{"insert position does not belong to Vector"};
+  }
+  return (tempPos);
+}
+
+template<class T, class Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, T&& value) {
+  int counter = 0;
+  bool contains = false;
+  for (const_iterator i = begin(); i != end(); ++i) {
+    if (i == pos) {
+      contains = true;
+      break;
+    }
+    counter++;
+  }
+  if (size_ == capacity_) reserve(capacity_ * 2);
+  iterator tempPos = &element_[counter];
+  if (contains) {
+    std::copy(tempPos, end(), tempPos + 1);
+    *tempPos = value;
+    size_++;
+  } else {
+    throw std::out_of_range{"insert position does not belong to Vector"};
+  }
+  return (tempPos);
+}
+
+template<class T, class Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, std::size_t count, const T& value) {
+  int counter = 0;
+  bool contains = false;
+  for (const_iterator i = begin(); i != end(); ++i) {
+    if (i == pos) {
+      contains = true;
+      break;
+    }
+    counter++;
+  }
+  if (size_ == capacity_) {
+    if (count < size_) reserve(capacity_ * 2);
+    else reserve(capacity_ * 2 + count);
+  }
+  iterator tempPos = &element_[counter];
+  if (contains) {
+    std::copy(tempPos, end(), tempPos + count);
+    std::fill_n(tempPos, count, value);
+    size_ += count;
+  } else {
+    throw std::out_of_range{"insert position does not belong to Vector"};
+  }
+  return (tempPos);
+}
+
+
+template<class T, class Allocator>
+template<typename InputIt, typename>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, InputIt first, InputIt last){
+  int counter = 0;
+  bool contains = false;
+  for (const_iterator i = begin(); i != end(); ++i) {
+    if (i == pos) {
+      contains = true;
+      break;
+    }
+    counter++;
+  }
+  int count=0;
+  for (auto i=first; i!=last; ++i){
+    count++;
+  }
+  if (size_ == capacity_) {
+    if (count < size_) reserve(capacity_ * 2);
+    else reserve(capacity_ * 2 + count);
+  }
+  iterator tempPos = &element_[counter];
+  if (contains) {
+    std::copy(tempPos, end(), tempPos + count);
+    std::copy(first, last, tempPos);
+    size_ += count;
+  } else {
+    throw std::out_of_range{"insert position does not belong to Vector"};
+  }
+  return (tempPos);
+}
+
+
+template<class T, class Allocator>
+typename Vector<T, Allocator>::iterator Vector<T, Allocator>::insert(const_iterator pos, std::initializer_list<T> ilist){
+  int counter = 0;
+  bool contains = false;
+  for (const_iterator i = begin(); i != end(); ++i) {
+    if (i == pos) {
+      contains = true;
+      break;
+    }
+    counter++;
+  }
+  int count=ilist.size();
+  if (size_ == capacity_) {
+    if (count < size_) reserve(capacity_ * 2);
+    else reserve(capacity_ * 2 + count);
+  }
+  iterator tempPos = &element_[counter];
+  if (contains) {
+    std::copy(tempPos, end(), tempPos + count);
+    std::copy(ilist.begin(), ilist.end(), tempPos);
+    size_ += count;
+  } else {
+    throw std::out_of_range{"insert position does not belong to Vector"};
+  }
+  return (tempPos);
+}
+
+
 
 #endif
