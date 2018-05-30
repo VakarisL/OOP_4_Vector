@@ -12,47 +12,6 @@ void display_sizes(const Vector<int>& nums1,
 }
 
 int main() {
-	//Vector<Vector<int>> V{{1,2},{3,4}};
-	// Vector<std::string> St{4, "potato"};
-	// Vector<Vector<int>> V{{1,3,4},{22,23,24},{145,253,134}};
-	// std::cout << V.size() << std::endl;
-	// std::cout << V.element(2).element(2) << std::endl;
-	// std::cout << St.element(3) << std::endl;
-
-	// Vector<int> Test(5, 3);
-	// std::cout << Test[0] << std::endl;
-
-	// std::vector<int> test_original{5, 3};
-	// std::cout << test_original[0] << std::endl;
-
-
-
-	// ############# TESTS ######################
-	//c-tors
-
-	// Vector<int> empty;
-	// std::cout << empty[0] << std::endl;
-
-	//std::cout << "hi"<<std::endl;
-
-	// std::vector<int> Temp(10, 2);
-	// std::vector<std::vector<int>> Potato(10, Temp);
-	// std::cout << Potato[0][0]; //<< " "<< Potato[5] << " "<< Potato[9]<< std::endl;
-
-	// Vector<std::string> st(10,"Potato");
-	// std::cout << st[0];// << " "<< Potato[5] << " "<< Potato[9]<< std::endl;
-
-	// Vector<int> V{1,2,3,4,5};
-	// std::cout << V[0] << " " << V[4	] << std::endl;
-
-	// Vector<std::string> godpls{"potato", "potato2"};
-	// std::cout <<godpls[0];
-	// Vector<Vector<int>> Ve{{1,2},{3,4}};
-	// std::cout << Ve[0][1] << " " << Ve[1][0] << std::endl;
-
-	Vector<std::string> potato(10, "potato");
-	std::cout << potato[6];
-
 	Vector<int> nums1 {3, 1, 4, 6, 5, 9};
 	Vector<int> wildcard {2, 1, 4, 6};
 	Vector<int> nums2;
@@ -116,5 +75,43 @@ int main() {
 	for (int i = 0; i < nums2.size(); ++i) {
 		std::cout << nums2[i] << std::endl;
 	}
+
+	nums2.emplace(nums2.begin() + 1, 99);
+	std::cout << "nums2 capacity after emplace: " << nums2.capacity() << std::endl;
+	for (int i = 0; i < nums2.size(); ++i) {
+		std::cout << nums2[i] << std::endl;
+	}
+
+
+	nums2.erase(nums2.begin() + 1, nums2.begin() + 3);
+	std::cout << "nums2 size after erase: " << nums2.size() << std::endl;
+	for (int i = 0; i < nums2.size(); ++i) {
+		std::cout << nums2[i] << std::endl;
+	}
+
+	nums2.push_back(16);
+	std::cout << "nums2 size after push_back: " << nums2.size() << std::endl;
+	for (int i = 0; i < nums2.size(); ++i) {
+		std::cout << nums2[i] << std::endl;
+	}
+
+	nums2.emplace_back(17);
+	std::cout << "nums2 size after emplace_back: " << nums2.size() << std::endl;
+	for (int i = 0; i < nums2.size(); ++i) {
+		std::cout << nums2[i] << std::endl;
+	}
+
+	nums2.pop_back();
+	std::cout << "nums2 size after pop_back: " << nums2.size() << std::endl;
+	for (int i = 0; i < nums2.size(); ++i) {
+		std::cout << nums2[i] << std::endl;
+	}
+
+	nums2.resize(15, 7);
+	std::cout << "nums2 size after resize: " << nums2.size() << std::endl;
+	for (int i = 0; i < nums2.size(); ++i) {
+		std::cout << nums2[i] << std::endl;
+	}
+
 	return 0;
 }
