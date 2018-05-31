@@ -47,7 +47,7 @@ class Vector {
   // assign
   void assign(std::size_t size, const T& value);
   template<typename InputIt/*, typename = std::_RequireInputIter<InputIt>*/>
-  void assign(InputIt first, InputIt last);             //TODO
+  void assign(InputIt first, InputIt last);
   void assign(std::initializer_list<T> input);
 
   // get_allocator
@@ -346,9 +346,10 @@ void Vector<T, Allocator>::reserve(std::size_t new_cap) {
   }
   if (new_cap > capacity_) {
     T* elementTemp = allocator_.allocate(new_cap);
-    for (std::size_t i = 0; i < size_; ++i) {
-      elementTemp[i] = element_[i];
-    }
+    // for (std::size_t i = 0; i < size_; ++i) {
+    //   elementTemp[i] = element_[i];
+    // }
+    std::copy(element_, element_+size_, elementTemp);
     allocator_.deallocate(element_, capacity_);
     capacity_ = new_cap;
     element_ = elementTemp;
@@ -583,17 +584,15 @@ typename Vector<T, Allocator>::iterator Vector<T, Allocator>::erase(const_iterat
 
 template<class T, class Allocator>
 void Vector<T, Allocator>::push_back(const T& value) {
-  if (capacity_ == 0) reserve(1);
-  if (size_ == capacity_) reserve(capacity_ * 2);
-  allocator_.construct(element_ + size_, value);
+  if (size_ == capacity_) reserve(capacity_ * 2 + 2);
+  element_[size_]=value;
   size_++;
 }
 
 template<class T, class Allocator>
 void Vector<T, Allocator>::push_back(T&& value) {
-  if (capacity_ == 0) reserve(1);
-  if (size_ == capacity_) reserve(capacity_ * 2);
-  allocator_.construct(element_ + size_, value);
+  if (size_ == capacity_) reserve(capacity_ * 2 + 2);
+  element_[size_]=std::move(value);
   size_++;
 }
 
